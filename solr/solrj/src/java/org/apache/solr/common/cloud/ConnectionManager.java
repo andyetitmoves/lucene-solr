@@ -69,6 +69,7 @@ public class ConnectionManager implements Watcher {
       disconnectedTimer = null;
     }
     likelyExpired = false;
+    notifyAll();
   }
 
   private synchronized void disconnected() {
@@ -90,10 +91,11 @@ public class ConnectionManager implements Watcher {
       }, (long) (client.getZkClientTimeout() * 0.90));
     }
     connected = false;
+    notifyAll();
   }
 
   @Override
-  public synchronized void process(WatchedEvent event) {
+  public void process(WatchedEvent event) {
     if (log.isInfoEnabled()) {
       log.info("Watcher " + this + " name:" + name + " got event " + event
           + " path:" + event.getPath() + " type:" + event.getType());
@@ -104,7 +106,7 @@ public class ConnectionManager implements Watcher {
       return;
     }
 
-    state = event.getState();
+    synchronized (this) { state = event.getState(); }
     if (state == KeeperState.SyncConnected) {
       connected();
       clientConnected.countDown();
@@ -165,7 +167,6 @@ public class ConnectionManager implements Watcher {
     } else {
       disconnected();
     }
-    notifyAll();
   }
 
   public synchronized boolean isConnected() {

@@ -588,11 +588,13 @@ public class ZkStateReader {
   }
 
   public void updateAliases() throws KeeperException, InterruptedException {
-    byte[] data = zkClient.getData(ALIASES, null, null, true);
+    synchronized (getUpdateLock()) {
+      byte[] data = zkClient.getData(ALIASES, null, null, true);
 
-    Aliases aliases = ClusterState.load(data);
+      Aliases aliases = ClusterState.load(data);
 
-    ZkStateReader.this.aliases = aliases;
+      ZkStateReader.this.aliases = aliases;
+    }
   }
   
 }

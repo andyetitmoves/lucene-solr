@@ -168,7 +168,7 @@ public class ZkStateReader {
 
   private ZkCmdExecutor cmdExecutor;
 
-  private Aliases aliases = new Aliases();
+  private volatile Aliases aliases = new Aliases();
 
   private volatile boolean closed = false;
 
